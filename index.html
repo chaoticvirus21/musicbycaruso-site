@@ -69,7 +69,12 @@
   }
 
   *{box-sizing:border-box;margin:0;padding:0;}
-  html{scroll-behavior:smooth;scroll-padding-top:84px;-webkit-text-size-adjust:100%;}
+  /* overflow-x guard: stops the off-canvas mobile menu (a fixed, off-screen
+     panel) from letting the page scroll sideways on phones. `clip` is used by
+     modern browsers (keeps smooth anchor scrolling); `hidden` is the fallback
+     for older iOS. Both are set on <html>, which — unlike <body> — reliably
+     clips fixed-position overflow on mobile Safari. */
+  html{scroll-behavior:smooth;scroll-padding-top:84px;-webkit-text-size-adjust:100%;overflow-x:hidden;overflow-x:clip;}
   body{
     font-family:var(--serif);
     background:var(--cream);
@@ -279,8 +284,8 @@
   }
   .song-card ul{list-style:none;margin-top:18px;}
   .song-card li{
-    padding:9px 0;border-bottom:1px dashed var(--line);
-    font-size:1rem;color:var(--ink);
+    padding:10px 0;border-bottom:1px dashed var(--line);
+    font-size:.98rem;color:var(--ink);line-height:1.45;
   }
   .song-card li:last-child{border-bottom:0;}
   .songs-note{
@@ -292,18 +297,53 @@
      LISTEN
      ======================================================================== */
   .listen{background:var(--cream);text-align:center;}
-  .listen .wrap{max-width:880px;}
-  .video-box{
-    margin-top:40px;border:1px solid var(--line);border-radius:4px;
-    background:var(--cream-2);aspect-ratio:16/9;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    gap:14px;color:var(--ink-soft);overflow:hidden;
+  .listen .wrap{max-width:980px;}
+
+  /* main player — portrait phone video */
+  .player-stage{margin-top:40px;display:flex;flex-direction:column;align-items:center;}
+  .player-stage video{
+    width:min(340px,86vw);aspect-ratio:9/16;background:#101710;
+    border-radius:6px;box-shadow:var(--shadow);
+    border:1px solid var(--line);display:block;
   }
-  .video-box svg{width:54px;height:54px;color:var(--sage-deep);}
-  .video-box .vb-t{font-style:italic;font-size:1.2rem;color:var(--ink);}
-  .video-box .vb-s{font-family:var(--sans);font-size:.78rem;letter-spacing:.06em;
-    max-width:42ch;padding:0 20px;}
-  .video-box iframe{width:100%;height:100%;border:0;}
+  .now-playing{
+    margin-top:18px;display:flex;flex-direction:column;gap:3px;align-items:center;
+  }
+  .now-playing .np-label{
+    font-family:var(--sans);font-size:.66rem;letter-spacing:.26em;
+    text-transform:uppercase;color:var(--sage-deep);
+  }
+  .now-playing .np-title{font-style:italic;font-size:1.3rem;color:var(--ink);}
+
+  /* thumbnail strip */
+  .vid-strip{
+    margin-top:34px;display:flex;gap:14px;overflow-x:auto;
+    padding:6px 4px 16px;scroll-snap-type:x proximity;
+    -webkit-overflow-scrolling:touch;
+  }
+  .vid-strip::-webkit-scrollbar{height:8px;}
+  .vid-strip::-webkit-scrollbar-track{background:transparent;}
+  .vid-strip::-webkit-scrollbar-thumb{background:var(--sage-deep);border-radius:4px;opacity:.5;}
+  .vid-thumb{
+    flex:none;width:108px;background:none;border:0;padding:0;cursor:pointer;
+    scroll-snap-align:start;font-family:inherit;text-align:center;
+  }
+  .vid-thumb img{
+    width:108px;height:192px;object-fit:cover;border-radius:4px;
+    border:2px solid transparent;outline:1px solid var(--line);
+    transition:transform .2s ease,border-color .2s ease,opacity .2s ease;
+    opacity:.88;
+  }
+  .vid-thumb span{
+    display:block;margin-top:8px;font-family:var(--sans);font-size:.7rem;
+    letter-spacing:.05em;color:var(--ink-soft);line-height:1.35;
+  }
+  .vid-thumb:hover img{transform:translateY(-3px);opacity:1;}
+  .vid-thumb.active img{border-color:var(--sage-deep);opacity:1;}
+  .vid-thumb.active span{color:var(--ink);font-weight:500;}
+  .vid-hint{
+    margin-top:6px;font-style:italic;color:var(--ink-soft);font-size:.95rem;
+  }
 
   /* ========================================================================
      QUOTE BAND
@@ -428,6 +468,109 @@
     .wrap{padding:0 20px;}
     .field-row{grid-template-columns:1fr;}
     .hero .tagline{padding-left:16px;}
+  }
+
+  /* ========================================================================
+     PRINT  —  converts the site into a clean printable document
+     ======================================================================== */
+  @media print{
+    @page{size:letter;margin:.5in .55in .6in;}
+
+    /* paper base, neutralize body chrome */
+    html,body{background:#fff !important;color:var(--ink) !important;}
+    body::before{display:none !important;}                       /* paper grain */
+    .reveal,.anim,.hero .anim{opacity:1 !important;transform:none !important;}
+
+    /* hide everything interactive or screen-only */
+    header,.burger,.hero-cta,.hero-guitar,.listen,
+    .form-card,button,.player-stage,.vid-strip,.vid-hint{display:none !important;}
+
+    /* reset all dark sections to light */
+    .hero,.about,.quote,.booking-pg,footer,
+    .intro,.songs,.listen,.booking{
+      background:#fff !important;color:var(--ink) !important;
+    }
+    .about-card{background:transparent !important;border-color:var(--line) !important;}
+    .about-body p,.about-body .dropcap,.quote blockquote,
+    .hero .tagline{color:var(--ink) !important;}
+    .about-body .dropcap::first-letter,
+    .hero h1 .first,.hero-eyebrow .eyebrow.light,
+    .hero-foot,.quote .by,.about h2.head em,
+    .stat .big,.about-card .flank{color:var(--sage-deep) !important;}
+    .hero h1 .last,.hero .role,.about h2.head,.stat .lbl,
+    .foot-brand,.foot-contact,.foot-bottom,.foot-tag{color:var(--ink) !important;}
+    .foot-brand em,.foot-contact a{color:var(--sage-deep) !important;}
+    .hero-eyebrow::after,.hero .tagline{border-color:var(--sage-deep) !important;}
+    .corner{border-color:var(--sage-deep) !important;}
+
+    /* tighter type & spacing for paper */
+    body{font-size:11pt;line-height:1.5;}
+    .section{padding:.4in 0 !important;}
+    .quote{padding:.3in 0 !important;}
+    .booking{padding:.32in 0 !important;}
+    .wrap{padding:0 !important;max-width:none;}
+    h2.head{font-size:22pt;}
+    .hero{min-height:0 !important;padding:.2in 0 .3in !important;}
+    .hero h1{font-size:0 !important;line-height:.95;}
+    .hero h1 .first{font-size:22pt !important;}
+    .hero h1 .last{font-size:46pt !important;}
+    .hero-grid{grid-template-columns:1.2fr .8fr !important;gap:.3in !important;
+      align-items:start !important;}
+    .hero .photo-frame{max-width:2.9in;padding:8px;order:0 !important;margin:0 !important;}
+    .photo-frame img{box-shadow:none !important;}
+    .hero .tagline{font-size:13pt;margin:.18in 0 .14in;}
+
+    /* sections that should stay together */
+    .feature,.song-card,.about-card,.contact-row,.quote{
+      page-break-inside:avoid;break-inside:avoid;
+    }
+    h2.head,h3,.eyebrow{page-break-after:avoid;break-after:avoid;}
+    .hero{page-break-after:auto;}
+    .songs{page-break-before:always;break-before:page;}
+    footer{page-break-before:avoid;break-before:avoid;}
+
+    /* features (What I do) */
+    .feature{background:transparent !important;border:1px solid var(--line) !important;
+      padding:18px 16px !important;}
+    .features{grid-template-columns:repeat(3,1fr) !important;gap:.16in !important;
+      margin-top:.3in !important;}
+    .feature h3{font-size:13pt;}
+    .feature p{font-size:9.5pt;}
+
+    /* about layout */
+    .about-grid{grid-template-columns:.9fr 1.1fr !important;gap:.4in !important;}
+    .about-card{padding:.3in .26in !important;}
+    .stat .big{font-size:22pt;}
+
+    /* songs */
+    .song-cols{grid-template-columns:repeat(3,1fr) !important;
+      gap:.18in !important;margin-top:.3in !important;}
+    .song-card{background:transparent !important;padding:.22in .2in !important;}
+    .song-card h3{font-size:13pt;}
+    .song-card li{padding:6px 0;font-size:10pt;}
+
+    /* booking: hide form, contact rows fill the page */
+    .book-grid{grid-template-columns:1fr !important;gap:0 !important;}
+    .booking h2.head{font-size:20pt;margin-bottom:.1in;}
+    .booking .lead{margin-top:.1in !important;font-size:11pt;}
+    .contact-row{color:var(--ink) !important;border-color:var(--line) !important;
+      padding:12px 0 !important;}
+    .contact-row .ic{color:var(--sage-deep) !important;
+      border-color:var(--sage-deep) !important;
+      width:34px !important;height:34px !important;}
+    .contact-list{margin-top:.18in !important;}
+    .quote blockquote{font-size:18pt !important;max-width:none;}
+    .quote .by{margin-top:.14in !important;}
+
+    /* footer as printed contact reference */
+    footer{padding:.3in 0 .1in !important;border-top:1px solid var(--line);}
+    .foot-top{padding-bottom:.18in !important;border-bottom:0 !important;
+      flex-direction:row !important;}
+    .foot-contact{text-align:right !important;font-size:9.5pt;}
+    .foot-bottom{margin-top:.1in !important;font-size:8pt;}
+
+    /* hide link URLs that would clutter (mailto/tel) */
+    a{text-decoration:none !important;color:inherit !important;}
   }
 </style>
 </head>
@@ -597,20 +740,27 @@
     </div>
 
     <!-- EDIT THE SONG LIST BELOW.
-         To add a song:  copy a  <li>Song Name</li>  line and change the name.
-         To remove one:  delete the whole  <li> ... </li>  line. -->
+         Each song is one line:    <li>Song Name</li>
+         To add a song: copy any whole <li>...</li> line, paste it below,
+                        and change the song name.
+         To remove a song: delete the whole <li>...</li> line. -->
     <div class="song-cols">
       <div class="song-card reveal">
         <span class="ct">Set One</span>
         <h3>Classic Rock</h3>
         <ul>
-          <li>Brown Eyed Girl</li>
-          <li>Free Fallin'</li>
-          <li>Take It Easy</li>
-          <li>Wonderful Tonight</li>
-          <li>Sweet Home Alabama</li>
-          <li>Hotel California</li>
-          <li>Margaritaville</li>
+          <li>Tequila Sunrise</li>
+          <li>With a Little Help from My Friends</li>
+          <li>Early Morning Rain</li>
+          <li>A Pirate Looks at Forty</li>
+          <li>Desperado</li>
+          <li>Teach Your Children</li>
+          <li>The Gambler</li>
+          <li>Welcome Back</li>
+          <li>Knockin' on Heaven's Door</li>
+          <li>Me and Bobby McGee</li>
+          <li>Old Man</li>
+          <li>Sweet Baby James</li>
         </ul>
       </div>
 
@@ -618,13 +768,18 @@
         <span class="ct">Set Two</span>
         <h3>Folk &amp; Singer-Songwriter</h3>
         <ul>
-          <li>Country Roads</li>
           <li>Fire and Rain</li>
+          <li>Take Me Home, Country Roads</li>
           <li>Landslide</li>
-          <li>The Boxer</li>
           <li>Heart of Gold</li>
-          <li>American Pie</li>
-          <li>Both Sides Now</li>
+          <li>The Boxer</li>
+          <li>City of New Orleans</li>
+          <li>Mr. Bojangles</li>
+          <li>Georgia on My Mind</li>
+          <li>Your Song</li>
+          <li>Don't Think Twice, It's All Right</li>
+          <li>Freight Train</li>
+          <li>The Dangling Conversation</li>
         </ul>
       </div>
 
@@ -632,13 +787,19 @@
         <span class="ct">Set Three</span>
         <h3>Dance Floor Favorites</h3>
         <ul>
-          <li>Mustang Sally</li>
-          <li>Old Time Rock and Roll</li>
+          <li>Brown Eyed Girl</li>
+          <li>Margaritaville</li>
+          <li>Louie Louie</li>
+          <li>Watching the River Run</li>
+          <li>With a Little Help from My Friends</li>
+          <li>Daydream</li>
+          <li>Changes in Latitudes, Changes in Attitudes</li>
+          <li>Take It Easy</li>
+          <li>Long Time Coming</li>
           <li>Twist and Shout</li>
-          <li>Sweet Caroline</li>
-          <li>Johnny B. Goode</li>
-          <li>Wagon Wheel</li>
-          <li>Livin' on a Prayer</li>
+          <li>Harvest Moon</li>
+          <li>Feliz Navidad</li>
+          <li>You Can't Do That</li>
         </ul>
       </div>
     </div>
@@ -658,26 +819,79 @@
     <!-- EDIT: listen section heading -->
     <h2 class="head" style="margin-top:8px;">Hear <em>Frank play</em></h2>
 
-    <!-- ====================================================================
-         TO ADD A VIDEO:
-         1. On YouTube, open the video, click "Share" then "Embed".
-         2. Copy the <iframe ...></iframe> code it gives you.
-         3. Delete the grey placeholder block below (from <div class="video-box">
-            down to its closing </div>) and paste the iframe in its place.
-         Example of what a finished embed looks like:
-           <div class="video-box">
-             <iframe src="https://www.youtube.com/embed/XXXXXXXX"
-               allowfullscreen></iframe>
-           </div>
-         ==================================================================== -->
-    <div class="video-box">
-      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M8 5v14l11-7z"/>
-      </svg>
-      <div class="vb-t">Performance video coming soon</div>
-      <div class="vb-s">A clip from a recent show will live right here.
-        Paste a YouTube embed to add one.</div>
+    <!-- The main video player. Clicking a song below loads it here. -->
+    <div class="player-stage">
+      <video id="mainPlayer" controls playsinline
+        preload="none"
+        poster="posters/welcome-back.jpg"
+        src="videos/welcome-back.mp4"></video>
+      <div class="now-playing">
+        <span class="np-label">Now playing</span>
+        <span class="np-title" id="npTitle">Welcome Back</span>
+      </div>
     </div>
+
+    <!-- ====================================================================
+         EDIT THE VIDEO LIST BELOW.
+         Each video is one <button> block. The order here is the order
+         shown on the site.
+         TO ADD A VIDEO:
+         1. Ask Giorgio to convert the clip to .mp4 (web format) — or use
+            any free "MOV to MP4" converter.
+         2. Put the video file in the  videos/  folder of this project and
+            a thumbnail image in the  posters/  folder (Giorgio can make
+            one from the video).
+         3. Copy one whole <button> block below, paste it where you want it
+            in the order, and change the three things: data-src (video file),
+            the img src (poster file), and the song title text.
+         ==================================================================== -->
+    <div class="vid-strip" id="vidStrip" aria-label="Song videos">
+      <button class="vid-thumb active" data-src="videos/welcome-back.mp4" data-poster="posters/welcome-back.jpg">
+        <img src="posters/welcome-back.jpg" alt="Welcome Back" loading="lazy"/>
+        <span>Welcome Back</span>
+      </button>
+      <button class="vid-thumb" data-src="videos/city-of-new-orleans.mp4" data-poster="posters/city-of-new-orleans.jpg">
+        <img src="posters/city-of-new-orleans.jpg" alt="City of New Orleans" loading="lazy"/>
+        <span>City of New Orleans</span>
+      </button>
+      <button class="vid-thumb" data-src="videos/pirate-looks-at-forty.mp4" data-poster="posters/pirate-looks-at-forty.jpg">
+        <img src="posters/pirate-looks-at-forty.jpg" alt="A Pirate Looks at Forty" loading="lazy"/>
+        <span>A Pirate Looks at Forty</span>
+      </button>
+      <button class="vid-thumb" data-src="videos/with-a-little-help.mp4" data-poster="posters/with-a-little-help.jpg">
+        <img src="posters/with-a-little-help.jpg" alt="With a Little Help from My Friends" loading="lazy"/>
+        <span>With a Little Help from My Friends</span>
+      </button>
+      <button class="vid-thumb" data-src="videos/bobby-mcgee.mp4" data-poster="posters/bobby-mcgee.jpg">
+        <img src="posters/bobby-mcgee.jpg" alt="Me and Bobby McGee" loading="lazy"/>
+        <span>Me and Bobby McGee</span>
+      </button>
+      <button class="vid-thumb" data-src="videos/mr-bojangles.mp4" data-poster="posters/mr-bojangles.jpg">
+        <img src="posters/mr-bojangles.jpg" alt="Mr. Bojangles" loading="lazy"/>
+        <span>Mr. Bojangles</span>
+      </button>
+      <button class="vid-thumb" data-src="videos/margaritaville.mp4" data-poster="posters/margaritaville.jpg">
+        <img src="posters/margaritaville.jpg" alt="Margaritaville" loading="lazy"/>
+        <span>Margaritaville</span>
+      </button>
+      <button class="vid-thumb" data-src="videos/brown-eyed-girl.mp4" data-poster="posters/brown-eyed-girl.jpg">
+        <img src="posters/brown-eyed-girl.jpg" alt="Brown Eyed Girl" loading="lazy"/>
+        <span>Brown Eyed Girl</span>
+      </button>
+      <button class="vid-thumb" data-src="videos/tequila-sunrise.mp4" data-poster="posters/tequila-sunrise.jpg">
+        <img src="posters/tequila-sunrise.jpg" alt="Tequila Sunrise" loading="lazy"/>
+        <span>Tequila Sunrise</span>
+      </button>
+      <button class="vid-thumb" data-src="videos/desperado.mp4" data-poster="posters/desperado.jpg">
+        <img src="posters/desperado.jpg" alt="Desperado" loading="lazy"/>
+        <span>Desperado</span>
+      </button>
+      <button class="vid-thumb" data-src="videos/the-wait.mp4" data-poster="posters/the-wait.jpg">
+        <img src="posters/the-wait.jpg" alt="The Wait" loading="lazy"/>
+        <span>The Wait</span>
+      </button>
+    </div>
+    <p class="vid-hint">Tap a song to play it &middot; filmed live around Central Florida</p>
   </div>
 </section>
 
@@ -835,6 +1049,22 @@
 
   /* ---- current year in footer ---- */
   document.getElementById('year').textContent = new Date().getFullYear();
+
+  /* ---- video gallery: clicking a thumbnail loads it in the main player ---- */
+  var player = document.getElementById('mainPlayer');
+  var npTitle = document.getElementById('npTitle');
+  var thumbs = document.querySelectorAll('.vid-thumb');
+  thumbs.forEach(function(t){
+    t.addEventListener('click', function(){
+      thumbs.forEach(function(x){ x.classList.remove('active'); });
+      t.classList.add('active');
+      player.pause();
+      player.setAttribute('poster', t.getAttribute('data-poster'));
+      player.src = t.getAttribute('data-src');
+      npTitle.textContent = t.querySelector('span').textContent;
+      player.play().catch(function(){ /* user can press play manually */ });
+    });
+  });
 
   /* ---- booking form: builds an email and opens the visitor's mail app ---- */
   document.getElementById('bookForm').addEventListener('submit', function(ev){

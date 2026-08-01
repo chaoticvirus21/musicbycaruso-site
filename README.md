@@ -56,7 +56,13 @@ Search for `407` — it appears in the contact row, the footer, and inside the `
 Search for `fecaruso@me.com` — appears in the contact row, the footer, the booking form `mailto:`, and the SEO meta tags.
 
 **Add or remove a song**
-Search for `EDIT THE SONG LIST`. To add a song: copy a line like `<li>Brown Eyed Girl</li>`, paste it below, change the song name. To remove: delete the whole `<li>...</li>` line.
+Search for `EDIT THE SONG LIST`. Each song is a single line:
+
+```html
+<li>Brown Eyed Girl</li>
+```
+
+To **add** a song: copy any whole `<li>...</li>` line, paste it below, change the song name. To **remove** a song: delete the whole `<li>...</li>` line.
 
 **Update Frank's bio**
 Search for `EDIT: Frank's story`.
@@ -66,6 +72,14 @@ Search for `EDIT: the headline tagline`.
 
 **Swap Frank's photo**
 The photo is embedded as a data URI to keep everything in one file. To replace it: send the new photo to Giorgio and he'll re-embed it. Or, do it yourself by uploading the photo to the repo and changing the `<img src="...">` line on the hero photo to point to the new file path.
+
+**Performance videos**
+The Listen section is a video gallery. Songs live in the `videos/` folder (web-ready .mp4), thumbnails in `posters/`. To add one:
+1. Convert the clip to .mp4 (Giorgio can do this, or any free MOV→MP4 converter — phone videos are usually HEVC, which browsers can't play)
+2. Add the .mp4 to `videos/` and a thumbnail .jpg to `posters/`
+3. In `index.html`, search for `EDIT THE VIDEO LIST`, copy one `<button>` block, and change the file names and song title. Order on the page = order in the file.
+
+Keep each video under 25 MB (Cloudflare Pages limit) — a 1–2 minute phone clip converted at web quality is typically 2–6 MB.
 
 ---
 
@@ -81,12 +95,12 @@ The photo is embedded as a data URI to keep everything in one file. To replace i
 - **Free option:** Cloudflare Email Routing forwards mail at the domain to any existing inbox
 - **Full mailbox:** Google Workspace or similar (paid)
 
-**Performance video** — search for `TO ADD A VIDEO` in `index.html` — instructions are inline.
-
 ---
 
 ## Files in this repo
 
-- `index.html` — the entire website (~110 KB, includes Frank's photo)
+- `index.html` — the website (includes Frank's photo; videos load from folders below)
+- `videos/` — performance clips (web-ready .mp4, one per song)
+- `posters/` — thumbnail images for the video gallery
 - `README.md` — this file
 - `.gitignore` — keeps OS and editor junk out of commits
