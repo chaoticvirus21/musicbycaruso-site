@@ -958,14 +958,19 @@
     </div>
 
     <!-- BOOKING FORM
-         This form opens the visitor's own email app with their message
-         pre-filled and addressed to Frank. (See Giorgio's note about
-         upgrading to a "real" form later.) -->
+         Submits to the Cloudflare Worker "musicbycaruso-booking", which emails
+         the request straight to Frank. The visitor does NOT need an email app.
+         The Worker web address is set in the script near the bottom of this
+         file (search for BOOKING_ENDPOINT). -->
     <div class="form-card reveal">
       <h3>Request a booking</h3>
       <p class="sub">No commitment — just a conversation.</p>
 
       <form id="bookForm" novalidate>
+        <!-- Honeypot: hidden from people, catches spam bots. Leave it empty. -->
+        <div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;">
+          <label>Company<input type="text" id="bf-company" tabindex="-1" autocomplete="off" /></label>
+        </div>
         <div class="field">
           <label for="bf-name">Your name</label>
           <input type="text" id="bf-name" required placeholder="First and last name" />
@@ -996,7 +1001,7 @@
           <textarea id="bf-msg" placeholder="Location, time, vibe you're going for, anything else..."></textarea>
         </div>
         <button type="submit" class="btn btn-primary">Send booking request</button>
-        <p class="form-note" id="formNote">This opens your email app with the message ready to send.</p>
+        <p class="form-note" id="formNote">Sends straight to Frank's inbox — he usually replies within a day.</p>
       </form>
     </div>
   </div>
@@ -1066,35 +1071,69 @@
     });
   });
 
-  /* ---- booking form: builds an email and opens the visitor's mail app ---- */
+  /* ---- booking form: sends the request to Frank via the booking Worker ---- */
+  /* EDIT: if the booking Worker's web address ever changes, update it here. */
+  var BOOKING_ENDPOINT = 'https://musicbycaruso-booking.incujorgeo.workers.dev/';
+
   document.getElementById('bookForm').addEventListener('submit', function(ev){
     ev.preventDefault();
+    var form = ev.target;
+    var btn  = form.querySelector('button[type="submit"]');
+    var note = document.getElementById('formNote');
     var name = document.getElementById('bf-name').value.trim();
     var email = document.getElementById('bf-email').value.trim();
-    var date = document.getElementById('bf-date').value;
-    var type = document.getElementById('bf-type').value;
-    var msg  = document.getElementById('bf-msg').value.trim();
-    var note = document.getElementById('formNote');
 
     if(!name || !email){
       note.textContent = 'Please add your name and email so Frank can reply.';
       note.style.color = '#e7b98f';
       return;
     }
-    /* EDIT: the address booking requests are sent to */
-    var to = 'frank@musicbycaruso.com';
-    var subject = 'Booking request — ' + type + (name ? ' (' + name + ')' : '');
-    var body =
-      'Name: ' + name + '\n' +
-      'Email: ' + email + '\n' +
-      'Event date: ' + (date || 'Not sure yet') + '\n' +
-      'Event type: ' + type + '\n\n' +
-      'Details:\n' + (msg || '(none provided)');
-    window.location.href = 'mailto:' + to +
-      '?subject=' + encodeURIComponent(subject) +
-      '&body=' + encodeURIComponent(body);
-    note.textContent = 'Opening your email app — just press send!';
-    note.style.color = '#b2cf8e';
+
+    var payload = {
+      name: name,
+      email: email,
+      date: document.getElementById('bf-date').value,
+      type: document.getElementById('bf-type').value,
+      message: document.getElementById('bf-msg').value.trim(),
+      company: document.getElementById('bf-company').value  /* honeypot */
+    };
+
+    var originalLabel = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+    note.textContent = '';
+
+    fetch(BOOKING_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    .then(function(res){
+      return res.json().catch(function(){ return {}; }).then(function(data){
+        return { ok: res.ok, data: data };
+      });
+    })
+    .then(function(result){
+      if(result.ok && result.data && result.data.ok){
+        form.reset();
+        note.textContent = 'Thank you — Frank got your request and will be in touch soon!';
+        note.style.color = '#b2cf8e';
+        btn.textContent = 'Sent ✓';
+      } else {
+        note.textContent = (result.data && result.data.error)
+          ? result.data.error
+          : 'Something went wrong. Please email frank@musicbycaruso.com directly.';
+        note.style.color = '#e7b98f';
+        btn.disabled = false;
+        btn.textContent = originalLabel;
+      }
+    })
+    .catch(function(){
+      note.textContent = 'Could not reach the server. Please email frank@musicbycaruso.com directly.';
+      note.style.color = '#e7b98f';
+      btn.disabled = false;
+      btn.textContent = originalLabel;
+    });
   });
 </script>
 </body>
