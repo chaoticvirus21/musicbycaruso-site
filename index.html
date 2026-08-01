@@ -38,6 +38,22 @@
 <meta property="og:title" content="Music by Caruso — Frank Caruso" />
 <meta property="og:description" content="Live music for every moment. Classic rock & folk in Central Florida." />
 <meta property="og:type" content="website" />
+<meta property="og:url" content="https://musicbycaruso.com/" />
+<meta property="og:site_name" content="Music by Caruso" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:image" content="https://musicbycaruso.com/og-image.jpg" />
+<meta property="og:image:width" content="617" />
+<meta property="og:image:height" content="460" />
+<meta property="og:image:alt" content="Frank Caruso performing live with his guitar" />
+
+<!-- Twitter / X link preview -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Music by Caruso — Frank Caruso" />
+<meta name="twitter:description" content="Live music for every moment. Classic rock & folk in Central Florida." />
+<meta name="twitter:image" content="https://musicbycaruso.com/og-image.jpg" />
+
+<!-- Canonical address of this page -->
+<link rel="canonical" href="https://musicbycaruso.com/" />
 
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2320301e'/%3E%3Cpath d='M32 13c12 0 22 6 22 18 0 14-14 19-22 21-8-2-22-7-22-21 0-12 10-18 22-18z' fill='%23b2cf8e'/%3E%3C/svg%3E" />
 
@@ -573,6 +589,45 @@
     a{text-decoration:none !important;color:inherit !important;}
   }
 </style>
+
+<!-- ========================================================================
+     STRUCTURED DATA  —  tells Google this is Frank Caruso, a live musician
+     serving Central Florida. Helps local search & rich results.
+     (Edit the details here if the phone, email, or genres change.)
+     ======================================================================== -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://musicbycaruso.com/#website",
+      "url": "https://musicbycaruso.com/",
+      "name": "Music by Caruso",
+      "description": "Live music for events in Central Florida — classic rock, folk, and crowd favorites."
+    },
+    {
+      "@type": ["MusicGroup", "LocalBusiness"],
+      "@id": "https://musicbycaruso.com/#business",
+      "name": "Music by Caruso",
+      "alternateName": "Frank Caruso",
+      "url": "https://musicbycaruso.com/",
+      "image": "https://musicbycaruso.com/og-image.jpg",
+      "description": "Frank Caruso is a Central Florida singer and guitarist performing classic rock, folk, and crowd favorites for events, parties, weddings, and venues. Solo, duet, or full band.",
+      "genre": ["Classic Rock", "Folk", "Live Music"],
+      "email": "frank@musicbycaruso.com",
+      "telephone": "+1-407-920-8662",
+      "areaServed": { "@type": "AdministrativeArea", "name": "Central Florida" },
+      "address": { "@type": "PostalAddress", "addressRegion": "FL", "addressCountry": "US" },
+      "member": {
+        "@type": "Person",
+        "name": "Frank Caruso",
+        "jobTitle": "Singer & Guitarist"
+      }
+    }
+  ]
+}
+</script>
 </head>
 <body>
 
