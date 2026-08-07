@@ -16,3 +16,4 @@ desktop.ini
 
 # Node (in case Decap CMS or similar gets added later)
 node_modules/
+.wrangler/
